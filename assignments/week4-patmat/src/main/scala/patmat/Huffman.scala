@@ -81,9 +81,8 @@ object Huffman {
     def times(chars: List[Char]): List[(Char, Int)] = if(chars.isEmpty) Nil else if(chars.tail.isEmpty) List((chars.head, 1)) else merge((chars.head, 1), times(chars.tail))
 
     def merge(tpl: (Char, Int), list: List[(Char, Int)]): List[(Char, Int)] = {
-      def tupleOf(char: Char, l: List[(Char, Int)]): (Char, Int) =  if(l.isEmpty) null else if(l.head._1 == char) l.head else tupleOf(char, l.tail)
-      val existing = tupleOf(tpl._1, list)
-      if(existing == null) tpl :: list else (tpl._1, existing._2 + tpl._2) :: list.filterNot(p => p==existing)
+      val existing = list.find(e => e._1 == tpl._1)
+      if(existing.isEmpty) tpl :: list else (tpl._1, existing.get._2 + tpl._2) :: list.filterNot(p => p==existing.get)
     }
   /**
    * Returns a list of `Leaf` nodes for a given frequency table `freqs`.
@@ -203,8 +202,8 @@ object Huffman {
       def bitsForChar(char: Char, tree: CodeTree): List[Bit] = tree match {
         case Leaf(c,_) => Nil
         case Fork(l, r, chars, _) => {
-          if(l.chars().contains(char)) bitsForChar(char, l) ::: List(0)
-          else bitsForChar(char, r) ::: List(1)
+          if(l.chars().contains(char)) List(0):::bitsForChar(char, l)
+          else List(1):::bitsForChar(char, r)
         }
       }
       def some(condition: List[Char] => Boolean, bitsToCharIden: (Char, CodeTree) => List[Bit])(chars: List[Char], acc: List[Bit]): List[Bit] = {
@@ -266,11 +265,9 @@ object Huffman {
     }
 
     def main(args: Array[String]): Unit = {
-//      val chars = List('d','a', 'b', 'a', 'c', 'b','c','c')
-//      val codeTree = createCodeTree(chars)
-//      println(codeTree)
-//      println(convert(codeTree))
-
-      println(decodedSecret)
+      val chars = List('d','a', 'b', 'a', 'c', 'b','c','c')
+      val codeTree = createCodeTree(chars)
+      println(codeTree)
+      println(convert(codeTree))
     }
   }
